@@ -1,5 +1,6 @@
+use std::cell::RefCell;
 use std::rc::Rc;
-use std::cell::Cell;
+
 use data::{Game, Player};
 use serde_json::{Error as SerdeError, from_str, to_string};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -10,10 +11,10 @@ use ws::{
 
 struct Server {
   out: Sender,
-  state: Rc<Cell<Game>>
+  state: Rc<RefCell<Game>>
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(tag = "type")]
 enum ClientMessage {
   /// This message is sent by a client that wishes to participate as a player
@@ -44,28 +45,91 @@ enum ClientMessage {
   }
 }
 
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+enum ServerMessage {
+
+  /// This message is sent by the server when a player has joined.
+  PlayerJoined {
+    id: String,
+    name: String
+  },
+
+  /// This message is sent by the server when the host has joined.
+  HostJoined {
+    id: String
+  }
+}
+
+impl Into<Message> for ServerMessage {
+  fn into(self) -> Message {
+    Message::Text(to_string(&self).unwrap())
+  }
+}
+
+impl Server {
+  fn log_game_state(&self) {
+    println!("====== Message handled ======");
+    println!("====== Game state ======");
+    println!("{:?}", &self.state.borrow());
+  }
+}
+
 impl Handler for Server {
   fn on_open(&mut self, _: Handshake) -> Result<()> {
-    // We have a new connection, so we increment the connection counter
     Ok(())
   }
 
   fn on_message(&mut self, msg: Message) -> Result<()> {
     let msg_json = msg.as_text().unwrap();
-    let parsed: ClientMessage = from_str(&msg_json).unwrap();
+    let client_msg: ClientMessage = from_str(&msg_json).unwrap();
 
-    let updated = match parsed {
+    let server_msg: Option<ServerMessage> = match client_msg {
 
       ClientMessage::Join { name } => {
-        let new_player = Player::new(name);
-        let state = self.state.clone().get_mut();
-        state.join(new_player)
+        let mut state = &self.state;
+        let mut game = state.borrow_mut();
+
+        let new_player = Player::new(name.clone());
+        let new_player_id = new_player.id.clone();
+        if game.join(new_player) {
+          Some(ServerMessage::PlayerJoined {
+            name, id: new_player_id
+          })
+        }
+        else {
+          None
+        }
+      },
+
+      ClientMessage::Host => {
+        None
+      },
+
+      ClientMessage::Buzz { .. } => {
+        None
+      },
+
+      ClientMessage::Clear { .. } => {
+        None
+      },
+
+      ClientMessage::Reset { .. } => {
+        None
       }
 
     };
 
+    // Message handled, log the current state of the game
+    self.log_game_state();
+
     // Send the response out
-    self.out.send(msg)
+    if server_msg.is_some() {
+      self.out.broadcast(server_msg.unwrap())
+    }
+    else {
+      Ok(())
+    }
   }
 
   // fn on_close(&mut self, code: CloseCode, reason: &str) {
@@ -84,7 +148,7 @@ impl Handler for Server {
 }
 
 pub fn start(addr: &str) -> Result<()> {
-  let state = Rc::new(Cell::new(Game::new()));
+  let state = Rc::new(RefCell::new(Game::new()));
   listen(addr, |out|
     Server { out: out, state: state.clone() })
 }

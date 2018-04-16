@@ -5,13 +5,11 @@
     <title>WS Client</title>
   </head>
   <body>
-      <strong>Received Messages:</strong>
-      <ol id="received">
-      </ol>
-      <form id="socket-form">
-        <input type="text" class='text' id="message">
-        <input type="submit" class='submit' value="Send">
-      </form>
+    <form id="join-form">
+      <label for="player-name">Name: </label>
+      <input type="text" class="text" name="player-name" id="player-name">
+      <input type="submit" class="submit" value="Join">
+    </form>
   </body>
 </html>
 <script type="text/javascript" src="client.js"></script>

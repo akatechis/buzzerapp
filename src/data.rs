@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 type Identifier = String;
 
-fn create_client_token(prefix: &str) -> String {
+fn create_identifier(prefix: &str) -> String {
   let timestamp = SystemTime::now()
     .duration_since(UNIX_EPOCH)
     .expect("Clock fubar");
@@ -16,20 +16,20 @@ fn create_client_token(prefix: &str) -> String {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Game {
   /// The host's client token
-  host: Identifier,
+  pub host: Identifier,
 
   /// A list of all clients participating
-  players: Vec<Player>,
+  pub players: Vec<Player>,
 
   /// The currently buzzed player
-  active_buzzer: Option<Identifier>
+  pub active_buzzer: Option<Identifier>
 }
 
 impl Game {
   pub fn new() -> Self {
     let players = vec![];
     let active_buzzer = None;
-    let host = create_client_token("host");
+    let host = create_identifier("host");
 
     Game { host, players, active_buzzer }
   }
@@ -78,13 +78,13 @@ impl Game {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Player {
-  id: Identifier,
-  name: String
+  pub id: Identifier,
+  pub name: String
 }
 
 impl Player {
   pub fn new(name: String) -> Self {
-    let id = create_client_token(&name);
+    let id = create_identifier(&name);
     Player { id, name }
   }
 }

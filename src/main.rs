@@ -9,7 +9,7 @@ mod data;
 
 fn main() {
   env_logger::init();
-  if let Err(e) = server::start("127.0.0.1:3000") {
+  if let Err(e) = server::start("127.0.0.1:4000") {
     println!("Error starting socket server: {}", e);
   }
 }

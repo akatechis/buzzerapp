@@ -1,23 +1,24 @@
-const socket = new WebSocket('ws://127.0.0.1:3000', 'rust-ws')
+const host = window.location.host || '127.0.0.1'
+const socket = new WebSocket('ws://' + host + ':4000')
 
-socket.onmessage = function (event) {
-  const received = document.getElementById('received')
-  const item = document.createElement('li')
-  const text = document.createTextNode(event.data)
-  item.appendChild(text)
-  received.appendChild(item)
-}
-
-const sendMessage = form => e => {
+const submitJoinForm = form => e => {
   e.preventDefault()
   const input = form.querySelector('input.text')
-  socket.send(input.value)
+  const msg = JSON.stringify(joinMessage(input.value))
+  socket.send(msg)
   input.value = ''
 }
 
+const joinMessage = name => {
+  return {
+    type: 'Join',
+    name: name
+  }
+}
+
 const main = () => {
-  const form = document.getElementById('socket-form')
-  form.addEventListener('submit', sendMessage(form))
+  const form = document.getElementById('join-form')
+  form.addEventListener('submit', submitJoinForm(form))
 }
 
 main()
