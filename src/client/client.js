@@ -1,4 +1,4 @@
-const socket = new window.WebSocket('ws://127.0.0.1:2794', 'rust-ws')
+const socket = new WebSocket('ws://127.0.0.1:3000', 'rust-ws')
 
 socket.onmessage = function (event) {
   const received = document.getElementById('received')
@@ -8,7 +8,8 @@ socket.onmessage = function (event) {
   received.appendChild(item)
 }
 
-const sendMessage = form => () => {
+const sendMessage = form => e => {
+  e.preventDefault()
   const input = form.querySelector('input.text')
   socket.send(input.value)
   input.value = ''
