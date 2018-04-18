@@ -5,7 +5,7 @@ extern crate md5;
 extern crate serde_json;
 
 mod server;
-mod data;
+mod model;
 
 fn main() {
   env_logger::init();

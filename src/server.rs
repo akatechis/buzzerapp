@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use data::{Game, Player};
+use model::{Game, Player};
 use serde_json::{Error as SerdeError, from_str, to_string};
 use std::time::{SystemTime, UNIX_EPOCH};
 use ws::{
