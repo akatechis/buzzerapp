@@ -92,14 +92,15 @@ impl Handler for Server {
 
         let new_player = Player::new(name.clone());
         let new_player_id = new_player.id.clone();
-        if game.join(new_player) {
-          Some(ServerMessage::PlayerJoined {
-            name, id: new_player_id
-          })
-        }
-        else {
-          None
-        }
+        None
+        // if game.join(new_player) {
+        //   Some(ServerMessage::PlayerJoined {
+        //     name, id: new_player_id
+        //   })
+        // }
+        // else {
+        //   None
+        // }
       },
 
       ClientMessage::Host => {
