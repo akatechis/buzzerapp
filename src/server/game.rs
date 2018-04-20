@@ -1,12 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use model::{Game, Player};
-use serde_json::{Error as SerdeError, from_str, to_string};
-use std::time::{SystemTime, UNIX_EPOCH};
+use model::Game;
+use serde_json::{from_str, to_string};
 use ws::{
-  listen, Handler, Sender, Result, Message, Handshake, CloseCode, 
-  Error as WSError
+  listen, Handler, Sender, Result, Message, Handshake, Error as WSError
 };
 
 struct Server {
@@ -87,12 +85,11 @@ impl Handler for Server {
     let server_msg: Option<ServerMessage> = match client_msg {
 
       ClientMessage::Join { name } => {
-        let mut state = &self.state;
-        let mut game = state.borrow_mut();
+        // let mut state = &self.state;
+        // let mut game = state.borrow_mut();
 
-        let new_player = Player::new(name.clone());
-        let new_player_id = new_player.id.clone();
-        None
+        // let new_player = Player::new(name.clone());
+        // let new_player_id = new_player.id.clone();
         // if game.join(new_player) {
         //   Some(ServerMessage::PlayerJoined {
         //     name, id: new_player_id
@@ -101,6 +98,7 @@ impl Handler for Server {
         // else {
         //   None
         // }
+        None
       },
 
       ClientMessage::Host => {
@@ -148,8 +146,8 @@ impl Handler for Server {
   }
 }
 
-pub fn start(addr: &str) -> Result<()> {
+pub fn start(config: Configuration) -> Result<()> {
   let state = Rc::new(RefCell::new(Game::new()));
-  listen(addr, |out|
+  listen(config.buzzer_url.clone(), |out|
     Server { out: out, state: state.clone() })
 }

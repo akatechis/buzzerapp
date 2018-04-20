@@ -1,5 +1,4 @@
 use model;
-use model::Player;
 
 /// Contains all state related to a game
 #[derive(Debug, Serialize, Deserialize)]
@@ -8,7 +7,7 @@ pub struct Game {
   pub host: String,
 
   /// A list of all clients participating
-  pub players: Vec<Player>,
+  pub players: Vec<model::Player>,
 
   /// The currently buzzed player
   pub active_buzzer: Option<String>
