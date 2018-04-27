@@ -1,3 +1,6 @@
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+
 extern crate ws;
 extern crate env_logger;
 extern crate md5;
@@ -6,41 +9,41 @@ extern crate serde_json;
 extern crate rusqlite;
 #[macro_use]
 extern crate serde_derive;
-extern crate hyper;
-extern crate futures;
+extern crate rocket;
 
-use hyper::server::Http;
-use dotenv::dotenv;
 use std::env;
-use server::api::*;
+use dotenv::dotenv;
 
-mod server;
 mod model;
 mod db;
+
+pub struct Configuration {
+  pub database_url: String,
+  pub service_url: String,
+}
 
 fn create_config() -> Configuration {
   Configuration {
     database_url: env::var("DATABASE_URL")
       .expect("DATABASE_URL must be set"),
 
-    buzzer_url: env::var("BUZZER_URL")
-      .expect("BUZZER_URL must be set")
+    service_url: env::var("SERVICE_URL")
+      .expect("SERVICE_URL must be set"),
   }
+}
+
+#[get("/")]
+fn index() -> &'static str {
+  "Hello, world!"
+}
+
+#[get("/favicon.ico")]
+fn favicon() -> &'static str {
+  "hahahaha"
 }
 
 fn main() {
   dotenv().ok();
   env_logger::init();
-
-  let config = create_config();
-  let addr = config.database_url.parse().unwrap();
-
-  let server = Http::new()
-  .bind(&addr, || Ok(server::api::APIService))
-  .unwrap();
-  server.run().unwrap();
-
-  // if let Err(e) = server::start(config) {
-  //   println!("Error starting server: {}", e);
-  // }
+  rocket::ignite().mount("/", routes![index]).launch();
 }
